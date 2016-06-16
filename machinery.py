@@ -11,6 +11,21 @@ class Vector:
 	def mod(self,i,value):
 		self.values[i] = value
 
+	def assign(self,vector):
+		self.length = vector.length
+		self.values = vector.values
+
+	def concatenate(self,vector):
+		result = Vector(self.length+vector.length,0.0)
+		index = 0
+		for i in range(0,self.length):
+			result.mod(index,self.values[i])
+			index += 1
+		for i in range(0,vector.length):
+			result.mod(index,vector.get(i))
+			index += 1
+		return result
+
 	def add(self,vector):
 		if self.length == vector.length:
 			result = Vector(self.length,0.0)
@@ -18,7 +33,7 @@ class Vector:
 				result.mod(i,self.values[i]+vector.get(i))
 			return result
 		else:
-			print("Attempted to add vectors of differing dimension")
+			print("incorrect dimensions")
 			return
 
 	def multiply_by_constant(self,c):
@@ -26,6 +41,41 @@ class Vector:
 		for i in range(0,self.length):
 			result.mod(i,c*self.values[i])
 		return result
+
+	def multiply_by_matrix(self,matrix):
+		if self.length != matrix.colDim:
+			print("incorrect dimensions")
+			return
+		else:
+			result = Vector(self.length,0.0)
+			for i in range(0,matrix.rowDim):
+				tmp = 0.0
+				for j in range(0,matrix.colDim):
+					tmp += matrix.get(i,j)*self.values[j]
+				result.mod(i,tmp)
+			return result
+
+	def multiply_remove(self,matrix):
+		if self.length != matrix.colDim:
+			print("incorrect dimensions")
+			return
+		else:
+			tmp = self.multiply_by_matrix(matrix)
+			result = Vector(self.length-1,0.0)
+			for i in range(1,self.length):
+				result.mod(i-1,tmp.get(i))
+			return result
+
+	def multiply_componentwise(self,vector):
+		if self.length != vector.length:
+			print("incorrect dimensions")
+			return
+		else:
+			result = Vector(self.length,0.0)
+			for i in range(0,self.length):
+				result.mod(i,vector.get(i)*self.values[i])
+			return result
+
 
 	def print_vector(self):
 		print(self.values)
