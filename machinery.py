@@ -76,6 +76,13 @@ class Vector:
 				result.mod(i,vector.get(i)*self.values[i])
 			return result
 
+	def outer_product(self,vector):
+		result = Matrix(vector.length,self.length,0.0)
+		for i in range(0,vector.length):
+			for j in range(0,self.length):
+				result.mod(i,j,vector.get(i)*self.values[j])
+		return result
+
 
 	def print_vector(self):
 		print(self.values)
