@@ -74,11 +74,11 @@ class nnet:
 			sensitivities[l].assign(sensitivities[l+1].multiply_remove(self.w[l+1]).multiply_componentwise(T))
 
 	def predict_internal(self, data, inputs, signals):
-		result = Vector(len(data))
+		result = []
 		for i in range(0,len(data)):
-			dataPoint = Vector(0,0,0)
+			dataPoint = Vector(0,0.0)
 			dataPoint.assign(augment_one(data[i]))
-			result[i] = self.forward_propagate(dataPoint,inputs,signals)
+			result.append(self.forward_propagate(dataPoint,inputs,signals))
 		return result
 
 	def update_gradient(self,inputs,sensitivities,gradients,gradients_update,y,N):
@@ -125,9 +125,9 @@ class nnet:
 				errorIn += ((pointPrediction-label[i])**2)/N
 				self.update_gradient(inputs,sensitivities,gradients,gradients_update,label[i],N)
 
-			self.update_weights(learningRate,gradients)
+			self.update_weights(gradients,learningRate)
 
-			predictionVal = predict_internal(dataVal,inputs,signals)
+			predictionVal = self.predict_internal(dataVal,inputs,signals)
 			errorVal = regression_error(predictionVal,labelVal)
 			if errorVal < errorValMin:
 				wOpt = self.w
@@ -208,7 +208,7 @@ class Vector:
 			print("incorrect dimensions, aborting multiplication")
 			return
 		else:
-			result = Vector(self.length,0.0)
+			result = Vector(matrix.rowDim,0.0)
 			for i in range(0,matrix.rowDim):
 				tmp = 0.0
 				for j in range(0,matrix.colDim):
@@ -218,18 +218,18 @@ class Vector:
 
 	def multiply_remove(self,matrix):
 		if self.length != matrix.colDim:
-			print("incorrect dimensions")
+			print("incorrect dimensions, aborting multiply with removal")
 			return
 		else:
 			tmp = self.multiply_by_matrix(matrix)
-			result = Vector(self.length-1,0.0)
-			for i in range(1,self.length):
+			result = Vector(tmp.length-1,0.0)
+			for i in range(1,tmp.length):
 				result.mod(i-1,tmp.get(i))
 			return result
 
 	def multiply_componentwise(self,vector):
 		if self.length != vector.length:
-			print("incorrect dimensions")
+			print("incorrect dimensions, aborting multiply_componentwise")
 			return
 		else:
 			result = Vector(self.length,0.0)
@@ -353,9 +353,9 @@ def sigmoid_map(vector):
 	return result
 
 def inverse_signal(vector):
-	result = Vector(vector.length()-1,0.0)
-	for i in range(1,vector.length()):
-		result.mod(i-1,1-vector.get(i)**2)
+	result = Vector(vector.length-1,0.0)
+	for i in range(1,vector.length):
+		result.mod(i-1,1.0-vector.get(i)**2)
 	return result
 
 def sign(number):
